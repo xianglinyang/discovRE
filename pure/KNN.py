@@ -5,6 +5,7 @@ __Auther__ = 'xianglin'
 import pyflann
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
 
 def get_data(path):
@@ -30,6 +31,16 @@ def get_label_name(label):
     """get label name from a list to a str"""
     return ','.join(label)
 
+
+def normalization(dataset,testset):
+    """normalize data with mean=0 and std=1"""
+    scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
+    scaler.fit(dataset)
+    d = scaler.transform(dataset)
+    t = scaler.transform(testset)
+    return d, t
+
+
 def numeric_filter(dataset_path, testset_path, sim_num=16):
     """
     find the top sim_num similar functions in the database compare to test data
@@ -47,8 +58,10 @@ def numeric_filter(dataset_path, testset_path, sim_num=16):
     dataset_numeric, dataset_labels = get_data(dataset_path)
     testset_numeric, testset_labels = get_data(testset_path)
 
+    dataset, testset = normalization(dataset_numeric, testset_numeric)
+
     flann = pyflann.FLANN()
-    result, dist = flann.nn(dataset_numeric, testset_numeric, sim_num, algorithm="kdtree", trees=4)
+    result, dist = flann.nn(dataset, testset, sim_num, algorithm="kdtree", trees=4)
 
     ans = {}
     for i in range(len(result)):
