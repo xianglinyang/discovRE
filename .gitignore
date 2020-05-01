@@ -7,13 +7,10 @@
 *.iml
 out
 gen
-pure/BBDistance.py
-pure/CalIncomingCalls.py
+
 pure/KNN.py
-pure/NumericFeatureExtractor.py
 pure/check.log
 pure/check.py
-pure/mCSDistance.py
 pure/tools/__pycache__/
 pure/tools/image/__init__.pyc
 pure/tools/image/__pycache__/
