@@ -21,8 +21,8 @@ def cal_incoming_calls(path):
         cfg.normalize()
         callgraph = cfg.functions.callgraph
         for addr in list(callgraph):
-            if r.exists(addr):
-                r.set(addr, int(r.get(addr)+1))
+            if r.exists(addr) == 1:
+                r.set(addr, int(r.get(addr)) + 1)
             else:
                 r.set(addr, 1)
     r.save()

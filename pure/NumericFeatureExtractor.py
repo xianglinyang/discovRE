@@ -206,7 +206,7 @@ def feature_extractor(func_cfg, entry_base, incoming_calls):
     in_calls = incoming_calls
 
     for n in func_cfg.nodes():
-        if n.function_address == entry_base:
+        if n.function_address == entry_base and n.block is not None:
             func_calls += cal_call_insts(n.block)
             logic_instrs += cal_logic_insts(n.block)
             transfer_instrs += cal_transfer_insts(n.block)
@@ -221,14 +221,15 @@ def feature_extractor(func_cfg, entry_base, incoming_calls):
 
 
 def get_bin_features(path, bin_name):
-    CalIncomingCalls.cal_incoming_calls(path)
+    # TODO when encountering a new binary, we should uncomment this line
+    # CalIncomingCalls.cal_incoming_calls(path)
     r = redis.Redis(host='localhost', port=6379, db=1)
-    columns = ['func_name', 'calls', 'logic_instrs', 'transfer_instrs',
+    columns = ['bin_name', 'func_name', 'calls', 'logic_instrs', 'transfer_instrs',
                'lv_size', 'blocks', 'edges', 'in_calls', 'instrs']
     img = Image(path)
     funcs = img.funcs
 
-    file_name = bin_name + time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time())) + '.csv'
+    file_name = "bin_features_" + time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time())) + '.csv'
     bin_feature_path = './bin_features'
     file_name = os.path.join(bin_feature_path, file_name)
     fileobj = open(file_name, 'w')
@@ -239,10 +240,14 @@ def get_bin_features(path, bin_name):
         entry = img.get_symbol_addr(func)
         if not entry:
             continue
+        if r.exists(entry) == 0:
+            continue
         func_cfg = img.get_cfg(func)
         func_cfg.normalize()
         row = feature_extractor(func_cfg, entry, int(r.get(entry)))
-        writer.writerow(row.insert(0, func))
+        row.insert(0, func)
+        row.insert(0, bin_name)
+        writer.writerow(row)
 
 #############################################################
 # Auxiliary functions
@@ -284,5 +289,7 @@ def get_string(img, addr):
 
 
 if __name__ == "__main__":
+    # TODO when encountering a new binary, we should uncomment line 255
+    # TODO need to find a way to store all incoming calls of all functions in all binary
     debug_vmlinux = "../testcase/2423496af35d94a87156b063ea5cedffc10a70a1/vmlinux"
     get_bin_features(debug_vmlinux, 'vmlinux')
