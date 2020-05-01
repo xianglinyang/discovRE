@@ -7,9 +7,8 @@
 *.iml
 out
 gen
-
-pure/KNN.py
-pure/check.log
+.log
+pure/bin_features/
 pure/check.py
 pure/tools/__pycache__/
 pure/tools/image/__init__.pyc
